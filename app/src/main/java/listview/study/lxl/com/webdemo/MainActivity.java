@@ -16,12 +16,18 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 
 public class MainActivity extends Activity {
 	TextView tv;int i;
@@ -56,7 +62,8 @@ public class MainActivity extends Activity {
 			if(response.getStatusLine().getStatusCode()==200){
 				HttpEntity entity= response.getEntity();
 				String sresponse= EntityUtils.toString(entity,"utf-8");
-				lxlXMLwithpull(sresponse);
+				//修改这里来切换不同的解析方法
+				parseXMLwithSAX(sresponse);
 			}
 			message.what=1;
 			handler.sendMessage(message);
@@ -184,6 +191,27 @@ public class MainActivity extends Activity {
 			handler.sendMessage(msg);
 
 		}
+	}
+
+
+
+	public  void parseXMLwithSAX(String s)  {
+		SAXParserFactory saxParserFactory=SAXParserFactory.newInstance();
+		XMLReader xmlReader;
+		try {
+			xmlReader = saxParserFactory.newSAXParser().getXMLReader();
+			MyHandler myHandler=new MyHandler();
+			xmlReader.setContentHandler(myHandler);
+			xmlReader.parse(new InputSource(new StringReader(s)));
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
 	}
 
 }
