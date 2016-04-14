@@ -37,11 +37,8 @@ public class MainActivity extends Activity {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						try {
-							test();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						httpcilent();
+
 					}
 				}).start();
 			}
@@ -51,7 +48,7 @@ public class MainActivity extends Activity {
 
 	private  void httpcilent() {
 		Message message = new Message();
-		HttpGet hg = new HttpGet("http://10.0.2.2:8080/index.html");
+		HttpGet hg = new HttpGet("http://192.168.0.109/android/mytest.xml");
 		HttpClient httpClient = new DefaultHttpClient();
 		try {
 			HttpResponse response = httpClient.execute(hg);
@@ -59,7 +56,7 @@ public class MainActivity extends Activity {
 			if(response.getStatusLine().getStatusCode()==200){
 				HttpEntity entity= response.getEntity();
 				String sresponse= EntityUtils.toString(entity,"utf-8");
-				parseXMLwithpull(sresponse);
+				lxlXMLwithpull(sresponse);
 			}
 			message.what=1;
 			handler.sendMessage(message);
@@ -115,7 +112,49 @@ public class MainActivity extends Activity {
 
 	}
 
+	private  void lxlXMLwithpull(String s){
+		try {
+			XmlPullParserFactory factory=XmlPullParserFactory.newInstance();
+			XmlPullParser xmlPullParser=factory.newPullParser();
+			xmlPullParser.setInput(new StringReader(s));
+			int eventype=xmlPullParser.getEventType();
+			String name="";
+			String	age="";
+			String height="";
+			String nodeName;
+			while (eventype!=XmlPullParser.END_DOCUMENT){
+				nodeName=xmlPullParser.getName();
+				switch (eventype){
+					case XmlPullParser.START_TAG:
+						if("name".equals(nodeName)){
+							name=xmlPullParser.nextText();
+						}
+						if("age".equals(nodeName)){
+							age=xmlPullParser.nextText();
+						}
+						if("height".equals(nodeName)){
+						height=xmlPullParser.nextText();
+					}
+						break;
+					case  XmlPullParser.END_TAG:
+						if ("app".equals(nodeName)) {
+							Log.d("mytestXMl", name);
+							Log.d("mytestXMl", age);
+							Log.d("mytestXMl", height);
+						}break;
+					default:
+						break;
+				}eventype=xmlPullParser.next();
 
+			}
+
+		} catch (XmlPullParserException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 
 	Handler handler=new Handler(){
@@ -132,7 +171,8 @@ public class MainActivity extends Activity {
 
 
 	private  void test() throws IOException {
-		//记得把tomcat的监听端口改为80 否则报refuse错误
+		//记得把tomcat的监听端口改为80 否则报refuse错误 真机测试可行
+
 	HttpGet hg=new HttpGet("http://192.168.0.109");
 
 		HttpClient hc=new DefaultHttpClient();
